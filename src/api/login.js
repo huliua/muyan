@@ -32,7 +32,7 @@ export function register(data) {
 export function getInfo() {
   return request({
     url: '/user/getInfo',
-    method: 'get',
+    method: 'post',
   });
 }
 

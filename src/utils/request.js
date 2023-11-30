@@ -74,7 +74,7 @@ service.interceptors.response.use(
             isRelogin.show = false;
             // 清除token
             removeToken();
-            location.href = '/index';
+            location.href = '/login';
           })
           .catch(() => {
             isRelogin.show = false;

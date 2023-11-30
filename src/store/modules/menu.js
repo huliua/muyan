@@ -1,5 +1,8 @@
 import {defineStore} from 'pinia';
 import {getAllMenu, getCanVisitedMenu} from '@/api/menu.js';
+import router from '../../router';
+// 匹配views里面所有的.vue文件
+const modules = import.meta.glob('../../view/**/*.vue');
 
 export const useMenuStore = defineStore('menu', {
   state: () => ({
@@ -12,13 +15,23 @@ export const useMenuStore = defineStore('menu', {
       // 获取所有的菜单列表
     },
     getCanVisitedMenu: function () {
+      // 已经获取过菜单就不用再次获取
+      if (this.treeMenu.length > 0) {
+        return new Promise((resolve, reject) => {
+          resolve(this.treeMenu);
+        });
+      }
       // 获取有权访问的菜单列表
       return new Promise((resolve, reject) => {
         getCanVisitedMenu()
           .then((res) => {            
             const canVisitedRoutes = res || [];
-            this.canVisitedRoutes = canVisitedRoutes;            
+            this.canVisitedRoutes = canVisitedRoutes;
+            // 先加载组件
+            loadView(canVisitedRoutes);       
             this.treeMenu = dealwithTree(canVisitedRoutes);
+            // 同步添加到路由中
+            this.addRoutes(this.treeMenu);
             resolve(this.treeMenu);
           })
           .catch((error) => {
@@ -26,6 +39,15 @@ export const useMenuStore = defineStore('menu', {
           });
       });
     },
+    addRoutes: function(treeMenu) {
+      const routes = [];
+      treeMenu.forEach(function(item) {
+        const dynamicRouter = convertFromMenu(item);
+        routes.push(dynamicRouter);
+        router.addRoute('index', dynamicRouter);
+      });
+      this.routes = routes;
+    }
   },
 
   getters: {
@@ -56,4 +78,40 @@ function dealwithTree(data) {
     }
   });
   return tree;
+}
+
+function loadView(menuList) {
+  menuList.forEach(function(menu) {
+    if (menu.component) {
+      menu.component = doLoadView(menu.component);
+    }
+  });
+}
+
+/**
+ * 把菜单元素转成路由对象
+ * @param {Object} menuItem 菜单元素
+ */
+function convertFromMenu(menuItem) {
+  return {
+    path: menuItem.path,
+    component: menuItem.component,
+    meta: {
+      title: menuItem.menuName,
+      permission: menuItem.perms
+    },
+    children: menuItem.children ? menuItem.children.map(convertFromMenu) : []
+  };
+}
+
+export const doLoadView = (view) => {
+  let res;
+  for (const path in modules) {
+    const dir = path.split('/view')[1].split('.vue')[0];    
+    if (dir === view) {
+      res = () => modules[path]();
+      break;
+    }
+  }
+  return res;
 }
