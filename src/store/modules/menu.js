@@ -4,7 +4,7 @@ import router from '../../router';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
 
-export const useMenuStore = defineStore('menu', {
+const useMenuStore = defineStore('menu', {
   state: () => ({
     routes: [], // 所有的菜单列表
     canVisitedRoutes: [], // 有权访问的路由列表
@@ -115,3 +115,4 @@ export const doLoadView = (view) => {
   }
   return res;
 }
+export default useMenuStore;

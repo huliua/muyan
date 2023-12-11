@@ -4,7 +4,8 @@ import 'nprogress/nprogress.css';
 import  {isRelogin} from '@/utils/request';
 import {getToken,removeToken} from '@/utils/auth';
 import {isBlank} from '@/utils/commonUtils';
-import { useMenuStore } from '../store/modules/menu';
+import useMenuStore from '@/store/modules/menu';
+import useUserStore from '@/store/modules/user';
 nProgress.configure({ showSpinner: false });
 
 // 静态路由
@@ -49,13 +50,20 @@ router.beforeEach((to, from, next) => {
         next({ path: '/login' });
         return;
     }
-    // 如果当前没有菜单数据
+    // 如果当前没有菜单数据    
     if (useMenuStore().treeMenu.length === 0) {
         // 请求菜单
         isRelogin.show = true;
-        useMenuStore().getCanVisitedMenu().then(() => {
-            isRelogin.show = false;
-            next({ ...to, replace: true });
+        useUserStore().getInfo().then(() => {
+            useMenuStore().getCanVisitedMenu().then(() => {
+                isRelogin.show = false;
+                next({ ...to, replace: true });
+            }).catch((err) => {
+                // 清除token,并跳转到登录页面
+                removeToken();
+                ElMessage.error(err);
+                next({ path: '/login' });
+            });
         }).catch((err) => {
             // 清除token,并跳转到登录页面
             removeToken();
@@ -69,5 +77,6 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(() => {
     nProgress.done();
+    isRelogin.show = false;
 });
 export default router;

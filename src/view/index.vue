@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useMenuStore } from '../store/modules/menu';
+import useMenuStore from '../store/modules/menu';
 import MenuItem from '@/components/menu/MenuItem.vue';
 import logo from '@/assets/logo/logo.svg'
 import AppMain from '@/components/AppMain/index.vue';
