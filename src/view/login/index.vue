@@ -4,7 +4,7 @@
 import { ref } from 'vue';
 import { User, Lock } from '@element-plus/icons-vue';
 import useUserStore from '@/store/modules/user';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const userStore = useUserStore();
 const loginForm = ref({
@@ -21,6 +21,16 @@ const loginRules = {
 const loading = ref(false);
 const loginRef = ref(null);
 const router = useRouter();
+const route = useRoute();
+
+// 解码url
+const redirectUrl = ref('');
+if (route.params && route.params.redirectUrl) {
+  redirectUrl.value = decodeURIComponent(route.params.redirectUrl);
+}
+if (route.query && route.query.redirectUrl) {
+  redirectUrl.value = decodeURIComponent(route.query.redirectUrl);
+}
 /**
  * 登录处理逻辑
  */
@@ -40,7 +50,7 @@ const handleLogin = function () {
       });
 
       // 跳转到首页
-      router.push('/');
+      router.push(redirectUrl.value || '/');
     }).catch((err) => {
       loading.value = false;
     }).finally(() => {
@@ -66,8 +76,7 @@ const register = ref(false);
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input v-model="loginForm.password" type="password" size="large" auto-complete="off" placeholder="密码"
-          show-password>
+        <el-input v-model="loginForm.password" type="password" size="large" auto-complete="off" placeholder="密码" show-password>
           <template #prefix>
             <el-icon>
               <Lock />

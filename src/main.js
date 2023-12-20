@@ -1,14 +1,15 @@
-import './assets/main.css'
+import './assets/main.css';
+import './assets/base.css';
 
-import { createApp } from 'vue'
-import App from './App.vue'
-import {createPinia} from "pinia";
-import router from  './router';
+import { createApp } from 'vue';
+import App from './App.vue';
+import { createPinia } from "pinia";
+import router from './router';
 // svg图标
 import 'virtual:svg-icons-register';
 
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import elementIcons from '@/components/SvgIcon/svgicon'
+import elementIcons from '@/components/SvgIcon/svgicon';
 
 const app = createApp(App);
 // 挂载pinia

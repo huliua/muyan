@@ -1,5 +1,5 @@
 export function isBlank(obj) {
-    return (typeof obj === 'undefined' || obj == null || (typeof obj === 'string' && obj.trim().length === 0));
+  return (typeof obj === 'undefined' || obj == null || (typeof obj === 'string' && obj.trim().length === 0));
 }
 export function tansParams(params) {
   let result = '';

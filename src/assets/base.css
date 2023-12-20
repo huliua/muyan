@@ -1,0 +1,8 @@
+.collapsed-menu .el-sub-menu .el-sub-menu__title {
+  padding: 0;
+  justify-content: center;
+}
+
+.collapsed-menu .el-sub-menu .el-sub-menu__title .svg-icon {
+  margin: 0;
+}

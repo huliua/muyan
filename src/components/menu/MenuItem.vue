@@ -17,7 +17,7 @@ const props = defineProps({
 
         <menu-item v-for="child in item.children" :key="child.path" :item="child" />
     </el-sub-menu>
-    <app-link v-else :to="item.path">
+    <app-link v-else :to="item.path" class="app-link">
         <el-menu-item :index="item.path">
             <template #title>
                 <svg-icon :icon-class="item.icon" />
@@ -28,10 +28,11 @@ const props = defineProps({
 </template>
 
 <style scoped>
-.el-menu-item .svg-icon {
+.el-sub-menu .svg-icon {
     margin-right: 16px;
 }
-.el-sub-menu .svg-icon {
+
+.app-link .svg-icon {
     margin-right: 16px;
 }
 </style>

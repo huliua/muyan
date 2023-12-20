@@ -1,5 +1,5 @@
-import {defineStore} from 'pinia';
-import {getAllMenu, getCanVisitedMenu} from '@/api/menu.js';
+import { defineStore } from 'pinia';
+import { getAllMenu, getCanVisitedMenu } from '@/api/menu.js';
 import router from '../../router';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
@@ -23,31 +23,33 @@ const useMenuStore = defineStore('menu', {
       }
       // 获取有权访问的菜单列表
       return new Promise((resolve, reject) => {
-        getCanVisitedMenu()
-          .then((res) => {            
-            const canVisitedRoutes = res || [];
-            this.canVisitedRoutes = canVisitedRoutes;
-            // 先加载组件
-            loadView(canVisitedRoutes);       
-            this.treeMenu = dealwithTree(canVisitedRoutes);
-            // 同步添加到路由中
-            this.addRoutes(this.treeMenu);
-            resolve(this.treeMenu);
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        getCanVisitedMenu().then((res) => {
+          const canVisitedRoutes = res || [];
+          this.canVisitedRoutes = canVisitedRoutes;
+          // 先加载组件
+          loadView(canVisitedRoutes);
+          this.treeMenu = dealwithTree(canVisitedRoutes);
+          // 同步添加到路由中
+          this.addRoutes(this.treeMenu);
+          resolve(this.treeMenu);
+        }).catch((error) => {
+          reject(error);
+        });
       });
     },
-    addRoutes: function(treeMenu) {
+    addRoutes: function (treeMenu) {
       const routes = [];
-      treeMenu.forEach(function(item) {
+      treeMenu.forEach(function (item) {
         const dynamicRouter = convertFromMenu(item);
         routes.push(dynamicRouter);
         router.addRoute('index', dynamicRouter);
       });
       this.routes = routes;
-    }
+    },
+
+    getRouterTree: function (path) {
+      return deepFind(this.treeMenu, path);
+    },
   },
 
   getters: {
@@ -55,9 +57,9 @@ const useMenuStore = defineStore('menu', {
      * 返回可以访问的菜单（包含目录和菜单）
      */
     canVisitedMenu(state) {
-        return state.canVisitedRoutes.filter((item)=> {
-            return item.type !== 'B';
-        });
+      return state.canVisitedRoutes.filter((item) => {
+        return item.type !== 'B';
+      });
     },
   }
 });
@@ -81,7 +83,7 @@ function dealwithTree(data) {
 }
 
 function loadView(menuList) {
-  menuList.forEach(function(menu) {
+  menuList.forEach(function (menu) {
     if (menu.component) {
       menu.component = doLoadView(menu.component);
     }
@@ -104,15 +106,28 @@ function convertFromMenu(menuItem) {
   };
 }
 
+/**
+ * 根据目标路径path获取对应的路径地址数组
+ * @param {Array} tree 树形菜单数组
+ * @param {String} path 待查找的路径地址
+ * @returns 返回目标path对应的路径数组
+ */
+function deepFind(tree, path, res) {
+  if (tree.path) {
+    return [];
+  }
+  return [];
+}
+
 export const doLoadView = (view) => {
   let res;
   for (const path in modules) {
-    const dir = path.split('/view')[1].split('.vue')[0];    
+    const dir = path.split('/view')[1].split('.vue')[0];
     if (dir === view) {
       res = () => modules[path]();
       break;
     }
   }
   return res;
-}
+};
 export default useMenuStore;

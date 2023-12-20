@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import nProgress from 'nprogress';
 import 'nprogress/nprogress.css';
-import  {isRelogin} from '@/utils/request';
-import {getToken,removeToken} from '@/utils/auth';
-import {isBlank} from '@/utils/commonUtils';
+import { isRelogin } from '@/utils/request';
+import { getToken, removeToken } from '@/utils/auth';
+import { isBlank } from '@/utils/commonUtils';
 import useMenuStore from '@/store/modules/menu';
 import useUserStore from '@/store/modules/user';
 nProgress.configure({ showSpinner: false });
@@ -47,7 +47,7 @@ router.beforeEach((to, from, next) => {
     }
     // 如果之前没有登录过，跳转到登录页面
     if (isBlank(getToken())) {
-        next({ path: '/login' });
+        next({ path: '/login', query: { redirectUrl: to.fullPath } });
         return;
     }
     // 如果当前没有菜单数据    
@@ -62,13 +62,13 @@ router.beforeEach((to, from, next) => {
                 // 清除token,并跳转到登录页面
                 removeToken();
                 ElMessage.error(err);
-                next({ path: '/login' });
+                next({ path: '/login', query: { redirectUrl: encodeURIComponent(to.fullPath) } });
             });
         }).catch((err) => {
             // 清除token,并跳转到登录页面
             removeToken();
             ElMessage.error(err);
-            next({ path: '/login' });
+            next({ path: '/login', query: { redirectUrl: encodeURIComponent(to.fullPath) } });
         });
     } else {
         next();

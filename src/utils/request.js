@@ -1,10 +1,10 @@
 import axios from 'axios';
-import {getToken, removeToken} from '@/utils/auth';
+import { getToken, removeToken } from '@/utils/auth';
 import errorCode from '@/utils/errorCode';
-import {tansParams, isBlank} from '@/utils/commonUtils';
+import { tansParams, isBlank } from '@/utils/commonUtils';
 
 // 是否显示重新登录
-export let isRelogin = {show: false};
+export let isRelogin = { show: false };
 let loadingInstance = null;
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8';
 // 创建axios实例
@@ -74,7 +74,7 @@ service.interceptors.response.use(
             isRelogin.show = false;
             // 清除token
             removeToken();
-            location.href = '/login';
+            location.href = '/login?redirectUrl=' + encodeURIComponent(location.href);
           })
           .catch(() => {
             isRelogin.show = false;
@@ -82,13 +82,13 @@ service.interceptors.response.use(
       }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。');
     } else if (code === 500) {
-      ElMessage({message: msg, type: 'error'});
+      ElMessage({ message: msg, type: 'error' });
       return Promise.reject(new Error(msg));
     } else if (code === 601) {
-      ElMessage({message: msg, type: 'warning'});
+      ElMessage({ message: msg, type: 'warning' });
       return Promise.reject(new Error(msg));
     } else if (code !== 200) {
-      ElNotification.error({title: msg});
+      ElNotification.error({ title: msg });
       return Promise.reject('error');
     } else {
       return Promise.resolve(res.data.data || {});
@@ -100,7 +100,7 @@ service.interceptors.response.use(
       loadingInstance.close();
     }
     console.log('err' + error);
-    let {message} = error;
+    let { message } = error;
     if (message == 'Network Error') {
       message = '后端接口连接异常';
     } else if (message.includes('timeout')) {
@@ -108,7 +108,7 @@ service.interceptors.response.use(
     } else if (message.includes('Request failed with status code')) {
       message = '系统接口' + message.substr(message.length - 3) + '异常';
     }
-    ElMessage({message: message, type: 'error', duration: 5 * 1000});
+    ElMessage({ message: message, type: 'error', duration: 5 * 1000 });
     return Promise.reject(error);
   }
 );
