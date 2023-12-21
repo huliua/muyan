@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { Fold, Expand } from '@element-plus/icons-vue';
 const props = defineProps({
     isCollapse: {

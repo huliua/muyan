@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import useMenuStore from '../store/modules/menu';
 import MenuItem from '@/components/menu/MenuItem.vue';
 import logo from '@/assets/logo/logo.svg';
@@ -23,7 +23,11 @@ const currentPath = computed(
 );
 // 获取当前路径对应的面包屑
 const currentSiteArr = ref([]);
-currentSiteArr.value = menuStore.getRouterTree(currentPath.value);
+watch(currentPath, () => {
+  currentSiteArr.value = menuStore.getRouterTree(currentPath.value);
+}, {
+  immediate: true
+});
 
 // 左侧菜单收缩
 const isCollapse = ref(false);

@@ -23,9 +23,14 @@ const constantRoutes = [
         path: '/',
         component: () => import('@/view/index.vue'),
         meta: {
+            permission: ["all"],
             keepAlive: false,
         },
     },
+    {
+        path: '/:pathMatch(.*)*',
+        component: () => import('@/view/error/404.vue'),
+    }
 ];
 const router = createRouter({
     history: createWebHistory(),
@@ -41,7 +46,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     nProgress.start();
-    if (to.path === '/login') {
+    // 如果访问的不是需要权限的页面，直接放行
+    if (isBlank(to.meta.permisson) || to.meta.permisson.length === 0) {
         next();
         return;
     }

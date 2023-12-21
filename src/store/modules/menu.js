@@ -100,7 +100,7 @@ function convertFromMenu(menuItem) {
     component: menuItem.component,
     meta: {
       title: menuItem.menuName,
-      permission: menuItem.perms
+      permission: menuItem.perms.split(','),
     },
     children: menuItem.children ? menuItem.children.map(convertFromMenu) : []
   };
@@ -112,11 +112,39 @@ function convertFromMenu(menuItem) {
  * @param {String} path 待查找的路径地址
  * @returns 返回目标path对应的路径数组
  */
-function deepFind(tree, path, res) {
-  if (tree.path) {
-    return [];
+function deepFind(tree, path) {
+  var res = [];
+  if (path === '/') {
+    return res;
   }
-  return [];
+  for (let index = 0; index < tree.length; index++) {
+    res = [];
+    if (deepFindPath(tree[index], path, res, 0)) {
+      break;
+    }
+  }
+  return res;
+}
+
+function deepFindPath(routers, path, res, deep) {
+  // 先添加到已访问的路径
+  res[deep] = {
+    id: routers.path,
+    name: routers.menuName
+  };
+  if (routers.path === path) {
+    // 移除数组deep之后的数据
+    res.splice(deep + 1);
+    return true;
+  }
+  if (routers.children) {
+    for (let index = 0; index < routers.children.length; index++) {
+      if (deepFindPath(routers.children[index], path, res, deep + 1)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export const doLoadView = (view) => {
