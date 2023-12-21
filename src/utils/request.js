@@ -2,6 +2,7 @@ import axios from 'axios';
 import { getToken, removeToken } from '@/utils/auth';
 import errorCode from '@/utils/errorCode';
 import { tansParams, isBlank } from '@/utils/commonUtils';
+import router from '@/router';
 
 // 是否显示重新登录
 export let isRelogin = { show: false };
@@ -74,7 +75,12 @@ service.interceptors.response.use(
             isRelogin.show = false;
             // 清除token
             removeToken();
-            location.href = '/login?redirectUrl=' + encodeURIComponent(location.href);
+            router.push({
+              path: '/login',
+              query: {
+                redirect: router.currentRoute.value.fullPath
+              }
+            });
           })
           .catch(() => {
             isRelogin.show = false;

@@ -15,6 +15,7 @@ const constantRoutes = [
         path: '/login',
         component: () => import('@/view/login/index.vue'),
         meta: {
+            permission: [],
             keepAlive: false,
         },
     },
@@ -23,13 +24,16 @@ const constantRoutes = [
         path: '/',
         component: () => import('@/view/index.vue'),
         meta: {
-            permission: ["all"],
+            permission: [],
             keepAlive: false,
         },
     },
     {
         path: '/:pathMatch(.*)*',
         component: () => import('@/view/error/404.vue'),
+        meta: {
+            permission: []
+        }
     }
 ];
 const router = createRouter({
@@ -46,11 +50,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     nProgress.start();
-    // 如果访问的不是需要权限的页面，直接放行
-    if (isBlank(to.meta.permisson) || to.meta.permisson.length === 0) {
+    if (to.path === '/login') {
         next();
         return;
     }
+
     // 如果之前没有登录过，跳转到登录页面
     if (isBlank(getToken())) {
         next({ path: '/login', query: { redirectUrl: to.fullPath } });
@@ -77,7 +81,18 @@ router.beforeEach((to, from, next) => {
             next({ path: '/login', query: { redirectUrl: encodeURIComponent(to.fullPath) } });
         });
     } else {
-        next();
+        // 如果访问的是不需要权限的页面（即permission为空数组），直接放行
+        if (!isBlank(to.meta.permission) && to.meta.permission.length === 0) {
+            next();
+            return;
+        } else if (useUserStore().hasPermission(to.meta.permission)) {
+            next();
+            return;
+        } else {
+            ElMessage.error('没有权限');
+            next({ path: '/401', replace: true });
+            return;
+        }
     }
 });
 
