@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getAllMenu, getCanVisitedMenu } from '@/api/menu.js';
+import { getCanVisitedMenu } from '@/api/menu.js';
 import router from '../../router';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
@@ -14,9 +14,9 @@ const useMenuStore = defineStore('menu', {
     getAllMenu: function () {
       // 获取所有的菜单列表
     },
-    getCanVisitedMenu: function () {
+    getCanVisitedMenu: function (needReload = false) {
       // 已经获取过菜单就不用再次获取
-      if (this.treeMenu.length > 0) {
+      if (!needReload && this.treeMenu.length > 0) {
         return new Promise((resolve, reject) => {
           resolve(this.treeMenu);
         });

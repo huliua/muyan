@@ -60,12 +60,12 @@ router.beforeEach((to, from, next) => {
         next({ path: '/login', query: { redirectUrl: to.fullPath } });
         return;
     }
-    // 如果当前没有菜单数据    
-    if (useMenuStore().treeMenu.length === 0) {
+    // 如果当前没有菜单数据或当前登录用户为空 
+    if (useMenuStore().treeMenu.length === 0 || isBlank(useUserStore().id)) {
         // 请求菜单
         isRelogin.show = true;
         useUserStore().getInfo().then(() => {
-            useMenuStore().getCanVisitedMenu().then(() => {
+            useMenuStore().getCanVisitedMenu(true).then(() => {
                 isRelogin.show = false;
                 next({ ...to, replace: true });
             }).catch((err) => {

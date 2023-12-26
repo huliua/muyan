@@ -18,60 +18,53 @@ const useUserStore = defineStore('user', {
       const username = userInfo.username.trim();
       const password = userInfo.password;
       return new Promise((resolve, reject) => {
-        login(username, password)
-          .then((res) => {
-            setToken(res.token);
-            this.token = res.token;
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        login(username, password).then((res) => {
+          setToken(res.token);
+          this.token = res.token;
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
       });
     },
     // 获取用户信息
     getInfo() {
       return new Promise((resolve, reject) => {
-        getInfo()
-          .then((res) => {
-            const user = res.user;
-            const avatar = user.avatar == '' || user.avatar == null ? defAva : import.meta.env.VITE_APP_BASE_API + user.avatar;
-            // 获取用户身份信息
-            if (res.roles && res.roles.length > 0) {
-              this.roles = res.roles;
-            } else {
-              this.roles = [];
-            }
-            // 获取用户权限信息
-            if (res.permissions && res.permissions.length > 0) {
-              this.permissions = res.permissions;
-            } else {
-              this.permissions = [];
-            }
-            this.id = user.userId;
-            this.name = user.userName;
-            this.avatar = avatar;
-            resolve(res);
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        getInfo().then((res) => {
+          const user = res.user;
+          const avatar = user.avatar == '' || user.avatar == null ? defAva : user.avatar;
+          // 获取用户身份信息
+          if (res.roles && res.roles.length > 0) {
+            this.roles = res.roles;
+          } else {
+            this.roles = [];
+          }
+          // 获取用户权限信息
+          if (res.permissions && res.permissions.length > 0) {
+            this.permissions = res.permissions;
+          } else {
+            this.permissions = [];
+          }
+          this.id = user.id;
+          this.name = user.nickName;
+          this.avatar = avatar;
+          resolve(res);
+        }).catch((error) => {
+          reject(error);
+        });
       });
     },
     // 退出系统
     logOut() {
       return new Promise((resolve, reject) => {
-        logout()
-          .then(() => {
-            this.token = '';
-            this.roles = [];
-            this.permissions = [];
-            removeToken();
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        logout().then(() => {
+          // 重置登录用户信息
+          this.resetData();
+          removeToken();
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
       });
     },
     hasPermission(permissions) {
@@ -81,6 +74,14 @@ const useUserStore = defineStore('user', {
       }
       // 判断用户的权限是否包含了permissions中的一种
       return this.permissions.some(permission => permissions.includes(permission));
+    },
+    resetData() {
+      this.id = '';
+      this.name = '';
+      this.avatar = '';
+      this.roles = [];
+      this.permissions = [];
+      this.token = '';
     }
   },
 });
