@@ -2,20 +2,32 @@
 <script setup>
 // 登录表单
 import { ref } from 'vue';
-import { User, Lock } from '@element-plus/icons-vue';
+import { Lock, User } from '@element-plus/icons-vue';
 import useUserStore from '@/store/modules/user';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const userStore = useUserStore();
 const loginForm = ref({
   username: '',
   password: '',
   rememberMe: false,
-  uuid: '',
+  uuid: ''
 });
 const loginRules = {
-  username: [{ required: true, trigger: 'blur', message: '请输入您的账号' }],
-  password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
+  username: [
+    {
+      required: true,
+      trigger: 'blur',
+      message: '请输入您的账号'
+    }
+  ],
+  password: [
+    {
+      required: true,
+      trigger: 'blur',
+      message: '请输入您的密码'
+    }
+  ]
 };
 // 是否登录中
 const loading = ref(false);
@@ -41,21 +53,25 @@ const handleLogin = function () {
     }
     loading.value = true;
     // 执行登录
-    userStore.login(loginForm.value).then((res) => {
-      loading.value = false;
-      ElNotification({
-        title: 'Success',
-        message: '登录成功',
-        type: 'success',
-      });
+    userStore
+      .login(loginForm.value)
+      .then(res => {
+        loading.value = false;
+        ElNotification({
+          title: 'Success',
+          message: '登录成功',
+          type: 'success'
+        });
 
-      // 跳转到首页
-      router.push(redirectUrl.value || '/');
-    }).catch((err) => {
-      loading.value = false;
-    }).finally(() => {
-      loading.value = false;
-    });
+        // 跳转到首页
+        router.push(redirectUrl.value || '/');
+      })
+      .catch(err => {
+        loading.value = false;
+      })
+      .finally(() => {
+        loading.value = false;
+      });
   });
 };
 

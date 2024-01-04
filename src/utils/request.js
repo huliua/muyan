@@ -97,7 +97,7 @@ service.interceptors.response.use(
       ElNotification.error({ title: msg });
       return Promise.reject('error');
     } else {
-      return Promise.resolve(res.data.data || {});
+      return Promise.resolve(res.data || {});
     }
   },
   (error) => {

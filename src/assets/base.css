@@ -6,3 +6,12 @@
 .collapsed-menu .el-sub-menu .el-sub-menu__title .svg-icon {
   margin: 0;
 }
+
+/* 菜单项的hover背景色 */
+.app-link li:hover {
+  background-color: var(--menu-hover-bg-color) !important;
+}
+/* 非菜单项的子菜单hover背景色 */
+.el-sub-menu__title:hover {
+  background-color: var(--menu-hover-bg-color) !important;
+}

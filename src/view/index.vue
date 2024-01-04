@@ -53,7 +53,7 @@ const changeCollapse = function (newValue) {
 
           </div>
 
-          <el-menu :default-active="currentPath" class="menu-main" :class="isCollapse ? 'collapsed-menu' : ''" active-text-color="#ffd04b" background-color="#545c64" text-color="#d8dce0" :collapse="isCollapse" :collapse-transition="false">
+          <el-menu :default-active="currentPath" class="menu-main" :class="isCollapse ? 'collapsed-menu' : ''" active-text-color="var(--menu-active-color)" background-color="var(--menu-bg-color)" text-color="var(--menu-text-color)" :collapse="isCollapse" :collapse-transition="false">
             <template v-for="menuItem in menuList" :key="menuItem.id">
               <menu-item :item="menuItem"></menu-item>
             </template>
@@ -99,10 +99,10 @@ const changeCollapse = function (newValue) {
 .menu-title {
   display: flex;
   height: 50px;
-  background-color: #545c64;
+  background-color: var(--menu-bg-color);
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--menu-text-color);
 }
 
 .menu-title a {
@@ -110,7 +110,7 @@ const changeCollapse = function (newValue) {
   width: 100%;
   height: 100%;
   text-align: center;
-  color: white;
+  color: var(--menu-text-color);
 }
 
 .sidebar-logo {
@@ -139,11 +139,6 @@ a:hover {
 
 .right-container {
   overflow: auto;
-}
-
-.main-container {
-  background-color: aqua;
-  overflow: initial;
 }
 
 .header {

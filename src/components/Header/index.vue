@@ -1,8 +1,8 @@
 <script setup>
-import { Fold, Expand } from '@element-plus/icons-vue';
+import { Fold, Expand, Moon, Sunny } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import useUserStore from "@/store/modules/user";
-
+import { useDark, useToggle } from '@vueuse/core';
 const props = defineProps({
     isCollapse: {
         type: Boolean,
@@ -35,6 +35,9 @@ const logout = () => {
     });
 };
 
+// 黑暗模式切换
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
 /**
  * 判断是否为当前站点
  * @param {*} site 站点
@@ -67,8 +70,13 @@ const isCurrentSite = (site, siteArr) => {
 
         <!-- 右侧菜单 -->
         <div class="right-menu">
+            <!-- 明亮黑暗模式切换 -->
+            <el-tooltip :effect="'light'" content="切换明亮/黑暗模式" placement="bottom">
+                <el-button text circle class="toggleModel" :icon="Sunny" size="large" v-if="isDark" @click="toggleDark()"></el-button>
+                <el-button text circle class="toggleModel" :icon="Moon" size="large" v-else @click="toggleDark()"></el-button>
+            </el-tooltip>
 
-            <!-- 用户名 -->
+            <!-- 用户信息下拉菜单 -->
             <el-dropdown class="dropdown-menu">
                 <span class="el-dropdown-link">
                     <el-avatar class="user-avatar" :size="40" :src="userStore.avatar" />
@@ -122,5 +130,9 @@ const isCurrentSite = (site, siteArr) => {
 
 .right-menu .dropdown-menu .el-dropdown-link {
     outline: none;
+}
+
+.toggleModel {
+    margin: 0 12px;
 }
 </style>

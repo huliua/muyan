@@ -1,0 +1,17 @@
+{
+  "useTabs": false,
+  "tabWidth": 2,
+  "printWidth": 9999,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "semi": true,
+  "bracketSpacing": true,
+  "jsxBracketSameLine": false,
+  "arrowParens": "avoid",
+  "overrides": [
+    {
+      "options": { "breakChainOnFirstMethodCall": true },
+      "files": "*.vue,*.js"
+    }
+  ]
+}

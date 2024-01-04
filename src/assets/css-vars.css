@@ -1,0 +1,12 @@
+html.dark {
+  --menu-text-color: #d8dce0;
+  --menu-bg-color: #1b0303;
+  --menu-active-color: #63bce7;
+  --menu-hover-bg-color: #0f2839;
+}
+html {
+  --menu-text-color: rgb(191, 203, 217);
+  --menu-bg-color: #2f3d51;
+  --menu-active-color: rgb(64, 158, 255);
+  --menu-hover-bg-color: #405e79;
+}

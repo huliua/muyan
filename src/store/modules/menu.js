@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getCanVisitedMenu } from '@/api/menu.js';
+import { buildTreeData } from '@/utils/treeUtils';
 import router from '../../router';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
@@ -8,7 +9,7 @@ const useMenuStore = defineStore('menu', {
   state: () => ({
     routes: [], // 所有的菜单列表
     canVisitedRoutes: [], // 有权访问的路由列表
-    treeMenu: [], // 树形结构的菜单列表
+    treeMenu: [] // 树形结构的菜单列表
   }),
   actions: {
     getAllMenu: function () {
@@ -23,18 +24,20 @@ const useMenuStore = defineStore('menu', {
       }
       // 获取有权访问的菜单列表
       return new Promise((resolve, reject) => {
-        getCanVisitedMenu().then((res) => {
-          const canVisitedRoutes = res || [];
-          this.canVisitedRoutes = canVisitedRoutes;
-          // 先加载组件
-          loadView(canVisitedRoutes);
-          this.treeMenu = dealwithTree(canVisitedRoutes);
-          // 同步添加到路由中
-          this.addRoutes(this.treeMenu);
-          resolve(this.treeMenu);
-        }).catch((error) => {
-          reject(error);
-        });
+        getCanVisitedMenu()
+          .then(res => {
+            const canVisitedRoutes = res.data || [];
+            this.canVisitedRoutes = canVisitedRoutes;
+            // 先加载组件
+            loadView(canVisitedRoutes);
+            this.treeMenu = buildTreeData(canVisitedRoutes);
+            // 同步添加到路由中
+            this.addRoutes(this.treeMenu);
+            resolve(this.treeMenu);
+          })
+          .catch(error => {
+            reject(error);
+          });
       });
     },
     addRoutes: function (treeMenu) {
@@ -49,7 +52,7 @@ const useMenuStore = defineStore('menu', {
 
     getRouterTree: function (path) {
       return deepFind(this.treeMenu, path);
-    },
+    }
   },
 
   getters: {
@@ -57,30 +60,12 @@ const useMenuStore = defineStore('menu', {
      * 返回可以访问的菜单（包含目录和菜单）
      */
     canVisitedMenu(state) {
-      return state.canVisitedRoutes.filter((item) => {
+      return state.canVisitedRoutes.filter(item => {
         return item.type !== 'B';
       });
-    },
+    }
   }
 });
-
-function dealwithTree(data) {
-  // 处理树形结构
-  const tree = [];
-  const map = {};
-  data.forEach((item) => {
-    map[item.id] = item;
-  });
-  data.forEach((item) => {
-    const parent = map[item.parentId];
-    if (parent) {
-      (parent.children || (parent.children = [])).push(item);
-    } else {
-      tree.push(item);
-    }
-  });
-  return tree;
-}
 
 function loadView(menuList) {
   menuList.forEach(function (menu) {
@@ -100,7 +85,7 @@ function convertFromMenu(menuItem) {
     component: menuItem.component,
     meta: {
       title: menuItem.menuName,
-      permission: menuItem.perms.split(','),
+      permission: menuItem.perms.split(',')
     },
     children: menuItem.children ? menuItem.children.map(convertFromMenu) : []
   };
@@ -147,7 +132,7 @@ function deepFindPath(routers, path, res, deep) {
   return false;
 }
 
-export const doLoadView = (view) => {
+export const doLoadView = view => {
   let res;
   for (const path in modules) {
     const dir = path.split('/view')[1].split('.vue')[0];
