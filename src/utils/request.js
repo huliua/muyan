@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken, removeToken } from '@/utils/auth';
 import errorCode from '@/utils/errorCode';
-import { tansParams, isBlank } from '@/utils/commonUtils';
+import { isBlank, tansParams } from '@/utils/commonUtils';
 import router from '@/router';
 
 // 是否显示重新登录
@@ -13,12 +13,12 @@ const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: import.meta.env.VITE_APP_BASE_API,
   // 超时
-  timeout: 10000,
+  timeout: 10000
 });
 
 // request拦截器
 service.interceptors.request.use(
-  (config) => {
+  config => {
     // 是否需要设置 token
     const needToken = (config.headers || {}).needToken;
     if ((isBlank(needToken) || needToken) && getToken()) {
@@ -30,7 +30,7 @@ service.interceptors.request.use(
       loadingInstance = ElLoading.service({
         lock: true,
         text: '加载中...',
-        background: 'rgba(0, 0, 0, 0.7)',
+        background: 'rgba(0, 0, 0, 0.7)'
       });
     }
     // get请求映射params参数
@@ -42,7 +42,7 @@ service.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  error => {
     console.log(error);
     Promise.reject(error);
   }
@@ -50,7 +50,7 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (res) => {
+  res => {
     // 关闭loading
     if (loadingInstance) {
       loadingInstance.close();
@@ -69,7 +69,7 @@ service.interceptors.response.use(
         ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', {
           confirmButtonText: '重新登录',
           cancelButtonText: '取消',
-          type: 'warning',
+          type: 'warning'
         })
           .then(() => {
             isRelogin.show = false;
@@ -78,7 +78,7 @@ service.interceptors.response.use(
             router.push({
               path: '/login',
               query: {
-                redirect: router.currentRoute.value.fullPath
+                redirectUrl: router.currentRoute.value.fullPath
               }
             });
           })
@@ -100,7 +100,7 @@ service.interceptors.response.use(
       return Promise.resolve(res.data || {});
     }
   },
-  (error) => {
+  error => {
     // 关闭loading
     if (loadingInstance) {
       loadingInstance.close();

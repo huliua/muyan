@@ -5,7 +5,7 @@ import request from '@/utils/request';
 export function getCanVisitedMenu() {
   return request({
     url: '/menu/getMenu',
-    method: 'post',
+    method: 'post'
   });
 }
 
@@ -15,7 +15,7 @@ export function getCanVisitedMenu() {
 export function getAllMenu() {
   return request({
     url: '/menu/getAllMenu',
-    method: 'post',
+    method: 'post'
   });
 }
 
@@ -27,5 +27,31 @@ export function getMenuList(params) {
     url: '/menu/getMenuList',
     method: 'post',
     data: params
+  });
+}
+
+export function addMenu(params) {
+  return request({
+    url: '/menu/addMenu',
+    method: 'post',
+    data: params
+  });
+}
+
+export function updateMenu(params) {
+  return request({
+    url: '/menu/updateMenu',
+    method: 'post',
+    data: params
+  });
+}
+
+export function deleteMenu(id) {
+  return request({
+    url: '/menu/deleteMenu',
+    method: 'post',
+    data: {
+      id
+    }
   });
 }

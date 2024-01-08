@@ -25,15 +25,22 @@ export function getQuerySetting(defaultQuery, queryFormObj) {
     }
     if (queryFormObj) {
         $.each(Object.keys(queryFormObj), function (index, key) {
-            if (isBlank(queryFormObj[key]["value"])) {
+            if (['isNull', 'isNotNull'].indexOf(queryFormObj[key]["builder"]) < 0 && isBlank(queryFormObj[key]["value"])) {
                 return;
             }
             finalQuery.push({
                 "name": queryFormObj[key]["name"] || key,
                 "builder": queryFormObj[key]["builder"],
-                "value": queryFormObj[key]["value"]
+                "value": buildValue(queryFormObj[key])
             });
         });
     }
     return JSON.stringify(finalQuery);
+}
+
+function buildValue(item) {
+    if (item.builder === 'between') {
+        return item.value[0] + "," + item.value[1];
+    }
+    return item.value;
 }

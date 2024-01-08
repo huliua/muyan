@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getCanVisitedMenu } from '@/api/menu.js';
+import { getCanVisitedMenu, getAllMenu } from '@/api/menu.js';
 import { buildTreeData } from '@/utils/treeUtils';
 import router from '../../router';
 // 匹配views里面所有的.vue文件
@@ -7,13 +7,28 @@ const modules = import.meta.glob('../../view/**/*.vue');
 
 const useMenuStore = defineStore('menu', {
   state: () => ({
+    allMenu: [], // 所有的菜单列表
+    allTreeMenu: [], // 树形结构的所有菜单列表
     routes: [], // 所有的菜单列表
     canVisitedRoutes: [], // 有权访问的路由列表
     treeMenu: [] // 树形结构的菜单列表
   }),
   actions: {
-    getAllMenu: function () {
-      // 获取所有的菜单列表
+    getAllMenu: function (needReload = false) {
+      // 已经获取过菜单就不用再次获取
+      if (!needReload && this.allMenu.length > 0) {
+        return new Promise((resolve, reject) => {
+          resolve(this.allTreeMenu);
+        });
+      }
+      return new Promise((resolve, reject) => {
+        // 获取所有的菜单列表
+        getAllMenu().then(res => {
+          this.allMenu = res.data || [];
+          this.allTreeMenu = buildTreeData(this.allMenu);
+          resolve(this.allTreeMenu);
+        });
+      });
     },
     getCanVisitedMenu: function (needReload = false) {
       // 已经获取过菜单就不用再次获取
