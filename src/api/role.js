@@ -33,3 +33,10 @@ export function deleteRole(id) {
     method: 'post'
   });
 }
+
+export function getRoleMenuPermission(id) {
+  return request({
+    url: `/role/menuPermission/${id}`,
+    method: 'post'
+  });
+}

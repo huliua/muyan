@@ -2,7 +2,7 @@
 <script setup>
 import { isBlank } from '@/utils/commonUtils';
 import { getQuerySetting } from '@/utils/querySettingUtils';
-import { getRoleList, updateRole, deleteRole } from '@/api/role';
+import { getRoleList, updateRole, deleteRole, getRoleMenuPermission } from '@/api/role';
 import useDictStore from '@/store/modules/dict.js';
 import dictTag from '@/components/DictTag/index.vue';
 import $ from 'jquery';
@@ -13,6 +13,8 @@ const tableData = ref([]);
 const pageSize = ref(10);
 const currentPage = ref(1);
 const total = ref(0);
+const treeRef = ref(null); // 树形组件
+const menuDefaultCheckedKeys = ref([]); // 菜单树默认选中的节点
 
 // 字典
 const dictStore = useDictStore();
@@ -98,6 +100,18 @@ const handleEdit = function (row) {
   title.value = '编辑';
   open.value = true;
   form.value = $.extend(true, {}, row);
+  menuDefaultCheckedKeys.value = [];
+  // 设置菜单权限
+  setMenuPermission(form.value.id);
+};
+/**
+ * 根据roleId获取菜单权限
+ * @param {*} roleId 角色id
+ */
+const setMenuPermission = function (roleId) {
+  getRoleMenuPermission(roleId).then(res => {
+    menuDefaultCheckedKeys.value = (res.data.menuIdList || []).map(item => { return item.menuId; });
+  });
 };
 /**
  * 删除菜单项
@@ -127,7 +141,8 @@ const form = ref({});
 const rules = ref({
   name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
   roleKey: [{ required: true, message: '权限字符不能为空', trigger: 'blur' }],
-  orderNum: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }]
+  orderNum: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
+  menuIds: [{ required: true, message: '菜单授权不能为空', trigger: 'blur' }]
 });
 const menuOptions = ref([]);
 const menuStore = useMenuStore();
@@ -144,6 +159,20 @@ watch(open, newVal => {
  * 表单提交
  */
 const submitForm = function (formEl) {
+  // 获取选中的菜单
+  const menuIds = treeRef.value.getCheckedKeys(false);
+  // 获取半选中的菜单
+  // 注意：这里需要使用getHalfCheckedKeys方法，因为getCheckedKeys方法只能获取到叶子节点的key
+  const halfMenuIds = treeRef.value.getHalfCheckedKeys();
+  // 把两个数组的数据合并
+  const menuAllIds = [...menuIds, ...halfMenuIds];
+  // 初始化menuIds数组
+  form.value.menuIds = [];
+  // 遍历menuAllIds数组，把每个key添加到menuIds数组中
+  menuAllIds.forEach(key => {
+    form.value.menuIds.push(key);
+  });
+
   formEl.validate(valid => {
     if (!valid) return;
     // 提交表单
@@ -203,7 +232,7 @@ const submitForm = function (formEl) {
       <el-table-column prop="createTime" label="创建时间" width="200" />
       <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click.prevent="handleEdit(scope.row)"> 编辑</el-button>
+          <el-button link type="primary" size="small" @click="handleEdit(scope.row)"> 编辑</el-button>
           <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)">
             <template #reference>
               <el-button link type="danger" size="small"> 删除</el-button>
@@ -217,7 +246,7 @@ const submitForm = function (formEl) {
       <pagination v-model:pageSize="pageSize" v-model:currentPage="currentPage" v-model:total="total" @pagination="getTableData()" />
     </div>
     <!-- 添加或修改菜单对话框 -->
-    <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false">
+    <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false" :draggable="true">
       <el-form ref="menuRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="12">
@@ -243,6 +272,11 @@ const submitForm = function (formEl) {
             </el-form-item>
           </el-col>
           <el-col :span="24">
+            <el-form-item label="菜单授权" prop="menuIds">
+              <el-tree ref="treeRef" class="tree-border" :check-strictly="true" :default-checked-keys="menuDefaultCheckedKeys" show-checkbox default-expand-all node-key="id" highlight-current :data="menuOptions" :props="{ label: 'menuName', children: 'children' }" placeholder="选择上级菜单" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
             <el-form-item label="备注" prop="remark">
               <el-input v-model="form.remark" :rows="2" type="textarea"></el-input>
             </el-form-item>
@@ -265,5 +299,13 @@ const submitForm = function (formEl) {
 
 .el-form-item__content .el-select {
   flex-grow: 1;
+}
+
+.tree-border {
+  margin-top: 5px;
+  border: 1px solid #e5e6e7;
+  background: #fff none;
+  border-radius: 4px;
+  width: 100%;
 }
 </style>

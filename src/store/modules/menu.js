@@ -7,6 +7,7 @@ const modules = import.meta.glob('../../view/**/*.vue');
 
 const useMenuStore = defineStore('menu', {
   state: () => ({
+    getAllMenuFromDb: false, // 获取所有菜单数据时，是否需要从数据库中加载（刷新缓存）
     allMenu: [], // 所有的菜单列表
     allTreeMenu: [], // 树形结构的所有菜单列表
     routes: [], // 所有的菜单列表
@@ -14,7 +15,14 @@ const useMenuStore = defineStore('menu', {
     treeMenu: [] // 树形结构的菜单列表
   }),
   actions: {
+    /**
+     * 设置需要重新加载所有菜单数据
+     */
+    setNeedRefreshAllMenu() {
+      this.getAllMenuFromDb = true;
+    },
     getAllMenu: function (needReload = false) {
+      needReload = needReload || this.getAllMenuFromDb;
       // 已经获取过菜单就不用再次获取
       if (!needReload && this.allMenu.length > 0) {
         return new Promise((resolve, reject) => {
@@ -26,6 +34,7 @@ const useMenuStore = defineStore('menu', {
         getAllMenu().then(res => {
           this.allMenu = res.data || [];
           this.allTreeMenu = buildTreeData(this.allMenu);
+          this.getAllMenuFromDb = false;
           resolve(this.allTreeMenu);
         });
       });
@@ -39,20 +48,18 @@ const useMenuStore = defineStore('menu', {
       }
       // 获取有权访问的菜单列表
       return new Promise((resolve, reject) => {
-        getCanVisitedMenu()
-          .then(res => {
-            const canVisitedRoutes = res.data || [];
-            this.canVisitedRoutes = canVisitedRoutes;
-            // 先加载组件
-            loadView(canVisitedRoutes);
-            this.treeMenu = buildTreeData(canVisitedRoutes);
-            // 同步添加到路由中
-            this.addRoutes(this.treeMenu);
-            resolve(this.treeMenu);
-          })
-          .catch(error => {
-            reject(error);
-          });
+        getCanVisitedMenu().then(res => {
+          const canVisitedRoutes = res.data || [];
+          this.canVisitedRoutes = canVisitedRoutes;
+          // 先加载组件
+          loadView(canVisitedRoutes);
+          this.treeMenu = buildTreeData(canVisitedRoutes);
+          // 同步添加到路由中
+          this.addRoutes(this.treeMenu);
+          resolve(this.treeMenu);
+        }).catch(error => {
+          reject(error);
+        });
       });
     },
     addRoutes: function (treeMenu) {
@@ -100,7 +107,7 @@ function convertFromMenu(menuItem) {
     component: menuItem.component,
     meta: {
       title: menuItem.menuName,
-      permission: menuItem.perms.split(',')
+      permission: (menuItem.perms || '').split(',')
     },
     children: menuItem.children ? menuItem.children.map(convertFromMenu) : []
   };

@@ -12,6 +12,7 @@ import $ from 'jquery';
 const tableData = ref([]);
 const pageSize = ref(-1);
 const currentPage = ref(1);
+const menuStore = useMenuStore();
 
 // 字典
 const dictStore = useDictStore();
@@ -65,14 +66,16 @@ const handleAdd = function (row) {
     form.value = {
       type: 'D',
       visible: '1',
-      status: '1'
+      status: '1',
+      isLink: '0'
     };
   } else {
     form.value = {
       type: 'M',
       parentId: row.id,
       visible: '1',
-      status: '1'
+      status: '1',
+      isLink: '0'
     };
   }
 
@@ -84,7 +87,6 @@ const handleAdd = function (row) {
  * @param row
  */
 const handleEdit = function (row) {
-  console.log('row', row);
   title.value = '新增';
   open.value = true;
   form.value = $.extend(true, {}, row);
@@ -93,9 +95,9 @@ const handleEdit = function (row) {
  * 删除菜单项
  */
 const deleteRow = function (row) {
-  console.log('row', row);
   deleteMenu(row.id).then(res => {
     ElMessage.success('删除成功！');
+    menuStore.setNeedRefreshAllMenu();
     getTableData();
   });
 };
@@ -122,7 +124,6 @@ const rules = ref({
   type: [{ required: true, message: '请选择菜单类型', trigger: 'blur' }]
 });
 const menuOptions = ref([]);
-const menuStore = useMenuStore();
 watch(open, newVal => {
   if (newVal === false) {
     return;
@@ -155,6 +156,8 @@ const submitForm = function (formEl) {
     (isBlank(form.value.id) ? addMenu : updateMenu)(form.value).then(res => {
       ElMessage.success((isBlank(form.value.id) ? '新增' : '更新') + '成功！');
       open.value = false;
+      // 设置加载菜单数据时不从缓存中取
+      menuStore.setNeedRefreshAllMenu();
       getTableData();
     });
   });
@@ -269,13 +272,12 @@ const submitForm = function (formEl) {
               <template #label>
                 <span>
                   <el-tooltip content="选择是外链则路由地址需要以`http(s)://`开头" placement="top">
-                    <el-icon><question-filled /></el-icon> </el-tooltip
-                  >是否外链
+                    <el-icon><question-filled /></el-icon> </el-tooltip>是否外链
                 </span>
               </template>
               <el-radio-group v-model="form.isLink">
-                <el-radio label="0">是</el-radio>
-                <el-radio label="1">否</el-radio>
+                <el-radio label="0">否</el-radio>
+                <el-radio label="1">是</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>

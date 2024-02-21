@@ -5,44 +5,48 @@
 </template>
   
 <script setup>
-import {computed} from 'vue';
+import { computed } from 'vue';
 const props = defineProps({
     to: {
         type: [String, Object],
         required: true
+    },
+    isLink: {
+        type: Boolean,
+        default: false
     }
-})
+});
 
 const isExt = computed(() => {
-    return isExternal(props.to)
-})
+    return isExternal(props);
+});
 
 const type = computed(() => {
     if (isExt.value) {
-        return 'a'
+        return 'a';
     }
-    return 'router-link'
-})
+    return 'router-link';
+});
 
-function linkProps() {    
+function linkProps() {
     if (isExt.value) {
         return {
             href: props.to,
             target: '_blank',
             rel: 'noopener'
-        }
+        };
     }
     return {
         to: props.to
-    }
+    };
 }
 
 /**
  * 判断是否为外链
  * @param {*} path 路径
  */
-function isExternal(path) {
-    return /^(https?:|mailto:|tel:)/.test(path);
+function isExternal(props) {
+    return props.hasOwnProperty("isLink") ? props.isLink : /^(https?:|mailto:|tel:)/.test(path);
 }
 </script>
   
