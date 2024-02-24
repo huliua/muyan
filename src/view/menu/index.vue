@@ -128,6 +128,8 @@ watch(open, newVal => {
   if (newVal === false) {
     return;
   }
+  // 清除表单校验
+  menuRef.value?.clearValidate();
   menuStore.getAllMenu().then(res => {
     menuOptions.value = res || [];
   });

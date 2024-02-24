@@ -136,7 +136,7 @@ const resetQuery = function (needReload = false) {
 // 表单相关
 const title = ref('');
 const open = ref(false);
-const menuRef = ref(null);
+const formRef = ref(null);
 const form = ref({});
 const rules = ref({
   name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
@@ -150,6 +150,9 @@ watch(open, newVal => {
   if (newVal === false) {
     return;
   }
+  // 清除表单校验
+  formRef.value?.clearValidate();
+  // 获取菜单数据
   menuStore.getAllMenu().then(res => {
     menuOptions.value = res || [];
   });
@@ -247,7 +250,7 @@ const submitForm = function (formEl) {
     </div>
     <!-- 添加或修改菜单对话框 -->
     <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false" :draggable="true">
-      <el-form ref="menuRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="12">
             <el-form-item label="角色名称" prop="name">
@@ -285,7 +288,7 @@ const submitForm = function (formEl) {
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm(menuRef)">确 定</el-button>
+          <el-button type="primary" @click="submitForm(formRef)">确 定</el-button>
           <el-button @click="open = false">取 消</el-button>
         </div>
       </template>
