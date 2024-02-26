@@ -1,10 +1,12 @@
 import request from '@/utils/request';
+import { setToken } from '@/utils/auth';
 
 // 登录方法
-export function login(username, password) {
+export function login(username, password, rememberMe) {
   const data = {
     username,
     password,
+    rememberMe
   };
   return request({
     url: '/user/login',
@@ -41,5 +43,18 @@ export function logout() {
   return request({
     url: '/user/logout',
     method: 'post',
+  });
+}
+
+// 刷新token
+export async function refreshToken() {
+  await request({
+    url: '/user/refreshToken',
+    method: 'post',
+    _isRefreshTokenRequest: true,
+  }).then(res => {
+    if (res.data.token) {
+      setToken(res.data.token);
+    }
   });
 }

@@ -1,5 +1,5 @@
 import { login, logout, getInfo } from '@/api/login';
-import { getToken, setToken, removeToken } from '@/utils/auth';
+import { getToken, setToken, removeToken, setRefreshToekn, removeRefreshToken } from '@/utils/auth';
 import defAva from '@/assets/images/profile.jpg';
 import { defineStore } from 'pinia';
 
@@ -17,9 +17,13 @@ const useUserStore = defineStore('user', {
     login(userInfo) {
       const username = userInfo.username.trim();
       const password = userInfo.password;
+      const rememberMe = userInfo.rememberMe;
       return new Promise((resolve, reject) => {
-        login(username, password).then((res) => {
+        login(username, password, rememberMe).then((res) => {
           setToken(res.data.token);
+          if (res.data.refreshToken) {
+            setRefreshToekn(res.data.refreshToken);
+          }
           this.token = res.data.token;
           resolve();
         }).catch((error) => {
@@ -61,6 +65,7 @@ const useUserStore = defineStore('user', {
           // 重置登录用户信息
           this.resetData();
           removeToken();
+          removeRefreshToken();
           resolve();
         }).catch((error) => {
           reject(error);

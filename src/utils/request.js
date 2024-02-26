@@ -1,12 +1,14 @@
 import axios from 'axios';
-import { getToken, removeToken } from '@/utils/auth';
+import { getToken, removeToken, getRefreshToken } from '@/utils/auth';
 import errorCode from '@/utils/errorCode';
 import { isBlank, tansParams } from '@/utils/commonUtils';
 import router from '@/router';
+import { refreshToken } from '@/api/login';
 
 // 是否显示重新登录
 export let isRelogin = { show: false };
 let loadingInstance = null;
+let isRefreshToken = false;
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8';
 // 创建axios实例
 const service = axios.create({
@@ -19,6 +21,12 @@ const service = axios.create({
 // request拦截器
 service.interceptors.request.use(
   config => {
+    // 判断是否是刷新token请求
+    isRefreshToken = config?._isRefreshTokenRequest;
+    if (isRefreshToken) {
+      config.headers['refresh-token'] = getRefreshToken();
+    }
+
     // 是否需要设置 token
     const needToken = (config.headers || {}).needToken;
     if ((isBlank(needToken) || needToken) && getToken()) {
@@ -50,7 +58,7 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  res => {
+  async res => {
     // 关闭loading
     if (loadingInstance) {
       loadingInstance.close();
@@ -64,27 +72,31 @@ service.interceptors.response.use(
       return res.data;
     }
     if (code === 401) {
+      // 如果当前不是刷新token请求，且存在刷新token，则需要执行刷新token方法
+      if (!isRefreshToken && !isBlank(getRefreshToken())) {
+        // 需要刷新token
+        await refreshToken();
+        return service(res.config);
+      }
       if (!isRelogin.show) {
         isRelogin.show = true;
         ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', {
           confirmButtonText: '重新登录',
           cancelButtonText: '取消',
           type: 'warning'
-        })
-          .then(() => {
-            isRelogin.show = false;
-            // 清除token
-            removeToken();
-            router.push({
-              path: '/login',
-              query: {
-                redirectUrl: router.currentRoute.value.fullPath
-              }
-            });
-          })
-          .catch(() => {
-            isRelogin.show = false;
+        }).then(() => {
+          isRelogin.show = false;
+          // 清除token
+          removeToken();
+          router.push({
+            path: '/login',
+            query: {
+              redirectUrl: router.currentRoute.value.fullPath
+            }
           });
+        }).catch(() => {
+          isRelogin.show = false;
+        });
       }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。');
     } else if (code === 500) {

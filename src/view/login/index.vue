@@ -100,7 +100,7 @@ const register = ref(false);
           </template>
         </el-input>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
+      <el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">7天免登录</el-checkbox>
       <el-form-item style="width: 100%">
         <el-button :loading="loading" size="large" type="primary" style="width: 100%" @click.native.prevent="handleLogin">
           <span v-if="!loading">登 录</span>
