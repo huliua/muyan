@@ -25,7 +25,7 @@ export function getQuerySetting(defaultQuery, queryFormObj) {
     }
     if (queryFormObj) {
         $.each(Object.keys(queryFormObj), function (index, key) {
-            if (['isNull', 'isNotNull'].indexOf(queryFormObj[key]["builder"]) < 0 && isBlank(queryFormObj[key]["value"])) {
+            if (['isNull', 'isNotNull'].indexOf(queryFormObj[key]["builder"]) < 0 && isValueBlank(queryFormObj[key]["value"])) {
                 return;
             }
             finalQuery.push({
@@ -42,5 +42,15 @@ function buildValue(item) {
     if (item.builder === 'between') {
         return item.value[0] + "," + item.value[1];
     }
+    if (Array.isArray(item.value)) {
+        return item.value.join(',');
+    }
     return item.value;
+}
+
+function isValueBlank(value) {
+    if ((Array.isArray(value) && value.length == 0) || isBlank(value)) {
+        return true;
+    }
+    return false;
 }

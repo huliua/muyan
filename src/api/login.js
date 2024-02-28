@@ -2,9 +2,9 @@ import request from '@/utils/request';
 import { setToken } from '@/utils/auth';
 
 // 登录方法
-export function login(username, password, rememberMe) {
+export function login(userName, password, rememberMe) {
   const data = {
-    username,
+    userName,
     password,
     rememberMe
   };

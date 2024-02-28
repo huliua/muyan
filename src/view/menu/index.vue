@@ -174,7 +174,7 @@ const submitForm = function (formEl) {
         <el-input v-model="queryParams.menuName.value" placeholder="请输入菜单名称" clearable style="width: 200px" @keyup.enter="getTableData" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status.value" placeholder="菜单状态" clearable style="width: 200px">
+        <el-select multiple v-model="queryParams.status.value" placeholder="菜单状态" clearable style="width: 200px">
           <el-option v-for="dict in dictStatus" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>

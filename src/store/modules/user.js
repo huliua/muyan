@@ -15,11 +15,11 @@ const useUserStore = defineStore('user', {
   actions: {
     // 登录
     login(userInfo) {
-      const username = userInfo.username.trim();
+      const userName = userInfo.userName.trim();
       const password = userInfo.password;
       const rememberMe = userInfo.rememberMe;
       return new Promise((resolve, reject) => {
-        login(username, password, rememberMe).then((res) => {
+        login(userName, password, rememberMe).then((res) => {
           setToken(res.data.token);
           if (res.data.refreshToken) {
             setRefreshToekn(res.data.refreshToken);
