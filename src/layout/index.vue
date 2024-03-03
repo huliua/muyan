@@ -6,6 +6,7 @@ import logo from '@/assets/logo/logo.svg';
 import AppMain from '@/components/AppMain/index.vue';
 import router from '@/router/index.js';
 import MyHeader from '@/components/Header/index.vue';
+import TagsView from '@/components/TagsView/index.vue';
 // 菜单相关
 const menuStore = useMenuStore();
 const menuList = ref([]);
@@ -64,6 +65,7 @@ const changeCollapse = function (newValue) {
     <el-container class="right-container">
       <el-header class="header">
         <my-header :isCollapse="isCollapse" :currentSiteArr="currentSiteArr" @collapse="changeCollapse" />
+        <tags-view />
       </el-header>
       <el-main class="main-container">
         <app-main />
@@ -143,5 +145,6 @@ a:hover {
 
 .header {
   padding: 0;
+  height: 100px;
 }
 </style>

@@ -100,12 +100,13 @@ const isCurrentSite = (site, siteArr) => {
 </template>
 <style scoped>
 .mainContent {
-    height: 100%;
+    height: 60%;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     flex-wrap: nowrap;
+    box-shadow: 0 1px 1px rgb(14 14 14 / 8%);
 }
 
 .collapse-button {

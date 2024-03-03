@@ -23,3 +23,18 @@ export function buildTreeData(data, props) {
   });
   return tree;
 }
+
+/**
+ * 构建树形路由地址的path路径（将父节点的path+子节点的path拼接在一起）
+ * @param {Array} tree 树形结构
+ */
+export function buildTreeRouterPath(tree, prePath = '') {
+  return tree.forEach(item => {
+    const path = item.path;
+    if (item.children && item.children.length > 0) {
+      buildTreeRouterPath(item.children, prePath + '/' + path);
+    } else if (item.isLink != '1') {
+      item.path = prePath + '/' + path;
+    }
+  });
+}

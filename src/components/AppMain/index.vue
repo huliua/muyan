@@ -1,19 +1,22 @@
 <template>
     <section class="app-main">
         <router-view v-slot="{ Component, route }">
-            <transition name="fade-transform" mode="out-in">
-                <div>
-                    <keep-alive>
-                        <component v-if="route.meta.keepAlive" :is="Component" :key="route.path" />
-                    </keep-alive>
-                    <component v-if="!route.meta.keepAlive" :is="Component" :key="route.path" />
-                </div>
-            </transition>
+            <Transition name="el-fade-in" mode="out-in">
+                <keep-alive :include="cachedViews">
+                    <component :is="Component" :key="route.path" />
+                </keep-alive>
+            </Transition>
         </router-view>
     </section>
 </template>
 
-<script setup></script>
+<script setup>
+import useTagsViewStore from '@/store/modules/tagsView';
+import { computed } from 'vue';
+
+const tagsViewStore = useTagsViewStore();
+const cachedViews = computed(() => tagsViewStore.cachedViews.map((item) => { return item.name; }));
+</script>
 
 <style scoped>
 .app-main {
@@ -36,6 +39,16 @@
     .fixed-header+.app-main {
         padding-top: 84px;
     }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
 

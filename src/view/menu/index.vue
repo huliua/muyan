@@ -1,5 +1,5 @@
 <!--菜单页面-->
-<script setup>
+<script setup name="Menu">
 import { isBlank } from '@/utils/commonUtils';
 import { addMenu, deleteMenu, getMenuList, updateMenu } from '@/api/menu';
 import { buildTreeData } from '@/utils/treeUtils';

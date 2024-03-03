@@ -1,5 +1,5 @@
 <!--菜单页面-->
-<script setup>
+<script setup name="User">
 import { isBlank } from '@/utils/commonUtils';
 import { getQuerySetting } from '@/utils/querySettingUtils';
 import useDictStore from '@/store/modules/dict.js';

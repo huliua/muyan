@@ -6,6 +6,8 @@ import { getToken, removeToken } from '@/utils/auth';
 import { isBlank } from '@/utils/commonUtils';
 import useMenuStore from '@/store/modules/menu';
 import useUserStore from '@/store/modules/user';
+import useTagsViewStore from '@/store/modules/tagsview';
+import Layout from '@/layout/index.vue';
 nProgress.configure({ showSpinner: false });
 
 // 静态路由
@@ -22,11 +24,13 @@ const constantRoutes = [
     {
         name: 'index',
         path: '/',
-        component: () => import('@/view/index.vue'),
+        component: () => Layout,
         meta: {
+            title: '首页',
             permission: [],
             keepAlive: false,
         },
+        children: []
     },
     {
         path: '/:pathMatch(.*)*',
@@ -34,6 +38,17 @@ const constantRoutes = [
         meta: {
             permission: []
         }
+    },
+    {
+        path: '/refresh',
+        meta: {
+            permission: []
+        },
+        component: Layout,
+        children: [{
+            path: '/refresh/:path(.*)',
+            component: () => import('@/view/refresh/index.vue')
+        }]
     }
 ];
 const router = createRouter({
@@ -73,12 +88,14 @@ router.beforeEach((to, from, next) => {
                 removeToken();
                 ElMessage.error(err);
                 next({ path: '/login', query: { redirectUrl: encodeURIComponent(to.fullPath) } });
+                return;
             });
         }).catch((err) => {
             // 清除token,并跳转到登录页面
             removeToken();
             ElMessage.error(err);
             next({ path: '/login', query: { redirectUrl: encodeURIComponent(to.fullPath) } });
+            return;
         });
     } else {
         // 如果访问的是不需要权限的页面（即permission为空数组），直接放行
@@ -96,7 +113,8 @@ router.beforeEach((to, from, next) => {
     }
 });
 
-router.afterEach(() => {
+router.afterEach((to, from) => {
+    useTagsViewStore().add(to);
     nProgress.done();
     isRelogin.show = false;
 });

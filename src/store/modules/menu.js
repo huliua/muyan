@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { getCanVisitedMenu, getAllMenu } from '@/api/menu.js';
-import { buildTreeData } from '@/utils/treeUtils';
+import { buildTreeData, buildTreeRouterPath } from '@/utils/treeUtils';
+import { firstUpperCase } from '@/utils/commonUtils';
 import router from '../../router';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
@@ -55,7 +56,10 @@ const useMenuStore = defineStore('menu', {
           loadView(canVisitedRoutes);
           this.treeMenu = buildTreeData(canVisitedRoutes);
           // 同步添加到路由中
-          this.addRoutes(this.treeMenu);
+          let routerPath = Array.from(this.treeMenu);
+          this.addRoutes(routerPath);
+          // 构建树形路径的path属性
+          buildTreeRouterPath(this.treeMenu);
           resolve(this.treeMenu);
         }).catch(error => {
           reject(error);
@@ -92,6 +96,7 @@ const useMenuStore = defineStore('menu', {
 function loadView(menuList) {
   menuList.forEach(function (menu) {
     if (menu.component) {
+      menu.name = firstUpperCase(menu.path);
       menu.component = doLoadView(menu.component);
     }
   });
@@ -109,6 +114,7 @@ function convertFromMenu(menuItem) {
       title: menuItem.menuName,
       permission: (menuItem.perms || '').split(',')
     },
+    name: menuItem.name,
     children: menuItem.children ? menuItem.children.map(convertFromMenu) : []
   };
 }

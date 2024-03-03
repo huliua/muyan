@@ -1,5 +1,5 @@
 <!--菜单页面-->
-<script setup>
+<script setup name="Role">
 import { isBlank } from '@/utils/commonUtils';
 import { getQuerySetting } from '@/utils/querySettingUtils';
 import { getRoleList, updateRole, deleteRole, getRoleMenuPermission } from '@/api/role';

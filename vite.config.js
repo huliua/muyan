@@ -7,6 +7,8 @@ import { defineConfig, loadEnv } from 'vite';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import path from 'path';
 import AutoImport from 'unplugin-auto-import/vite';
+import VueSetupExtend from 'vite-plugin-vue-setup-extend';
+
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
@@ -25,7 +27,9 @@ export default defineConfig(({ mode, command }) => {
       createSvgIconsPlugin({
         iconDirs: [path.resolve(process.cwd(), 'src/assets/icons/svg')],
         symbolId: 'icon-[dir]-[name]'
-      })
+      }),
+
+      VueSetupExtend()
     ],
     resolve: {
       alias: {
