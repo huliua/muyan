@@ -146,7 +146,7 @@ function closeAllTags() {
 .tagsView {
     height: 40%;
     width: 100%;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid var(--el-border-color);
     display: flex;
     align-items: center;
     justify-content: left;
@@ -160,7 +160,7 @@ function closeAllTags() {
     height: 25px;
     border: 1px solid var(--el-border-color);
     color: var(--el-text-color-regular);
-    background: #fff;
+    background: var(--el-info-color);
     padding: 0 8px;
     font-size: 12px;
     margin-left: 5px;

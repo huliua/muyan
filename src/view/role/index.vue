@@ -7,6 +7,7 @@ import useDictStore from '@/store/modules/dict.js';
 import dictTag from '@/components/DictTag/index.vue';
 import $ from 'jquery';
 import useMenuStore from '@/store/modules/menu';
+import { hasPermission } from '../../utils/auth';
 
 const tableRef = ref(null);
 const tableData = ref([]);
@@ -214,8 +215,8 @@ const submitForm = function (formEl) {
 
     <el-row :gutter="10" class="mv8">
       <el-col :span="1.5">
-        <el-button type="primary" @click="handleAdd(null)">新增</el-button>
-        <el-button type="danger" @click="batchDel">删除</el-button>
+        <el-button type="primary" @click="handleAdd(null)" v-if="hasPermission('sys:role:add')">新增</el-button>
+        <el-button type="danger" @click="batchDel" v-if="hasPermission('sys:role:delete')">删除</el-button>
       </el-col>
     </el-row>
 
@@ -235,8 +236,8 @@ const submitForm = function (formEl) {
       <el-table-column prop="createTime" label="创建时间" width="200" />
       <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="handleEdit(scope.row)"> 编辑</el-button>
-          <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)">
+          <el-button link type="primary" size="small" @click="handleEdit(scope.row)" v-if="hasPermission('sys:role:update')"> 编辑</el-button>
+          <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)" v-if="hasPermission('sys:role:delete')">
             <template #reference>
               <el-button link type="danger" size="small"> 删除</el-button>
             </template>

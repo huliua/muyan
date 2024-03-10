@@ -10,6 +10,7 @@ import useMenuStore from '@/store/modules/menu.js';
 import dictTag from '@/components/DictTag/index.vue';
 import $ from 'jquery';
 import { computed } from 'vue';
+import { hasPermission } from '@/utils/auth';
 
 const tableData = ref([]);
 const pageSize = ref(-1);
@@ -247,7 +248,7 @@ const submitForm = function (formEl) {
 
     <el-row :gutter="10" class="mv8">
       <el-col :span="1.5">
-        <el-button type="primary" @click="handleAdd(null)">新增</el-button>
+        <el-button type="primary" @click="handleAdd(null)" v-if="hasPermission('sys:menu:add')">新增</el-button>
       </el-col>
     </el-row>
 
@@ -272,9 +273,9 @@ const submitForm = function (formEl) {
       <el-table-column fixed="right" label="操作" width="150">
 
         <template #default="scope">
-          <el-button link type="primary" size="small" @click.prevent="handleEdit(scope.row)"> 编辑</el-button>
-          <el-button link type="primary" size="small" :disabled="['D', 'M'].indexOf(scope.row.type) === -1 || scope.row.isLink === '1'" @click.prevent="handleAdd(scope.row)"> 新增</el-button>
-          <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)">
+          <el-button link type="primary" size="small" @click.prevent="handleEdit(scope.row)" v-if="hasPermission('sys:menu:update')"> 编辑</el-button>
+          <el-button link type="primary" size="small" :disabled="['D', 'M'].indexOf(scope.row.type) === -1 || scope.row.isLink === '1'" @click.prevent="handleAdd(scope.row)" v-if="hasPermission('sys:menu:add')"> 新增</el-button>
+          <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)" v-if="hasPermission('sys:menu:delete')">
             <template #reference>
               <el-button link type="danger" size="small"> 删除</el-button>
             </template>

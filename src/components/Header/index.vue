@@ -79,7 +79,7 @@ const isCurrentSite = (site, siteArr) => {
             <!-- 用户信息下拉菜单 -->
             <el-dropdown class="dropdown-menu">
                 <span class="el-dropdown-link">
-                    <el-avatar class="user-avatar" :size="40" :src="userStore.avatar" />
+                    <el-avatar class="user-avatar" :size="40" :src="userStore.avatar" fit="scale-down" />
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>

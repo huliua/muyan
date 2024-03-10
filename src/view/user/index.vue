@@ -7,6 +7,7 @@ import dictTag from '@/components/DictTag/index.vue';
 import { getUserList, updateUser, deleteUser, changePwd } from '@/api/user.js';
 import { getRoleList } from '@/api/role';
 import { Lock } from '@element-plus/icons-vue';
+import { hasPermission } from '@/utils/auth.js';
 
 import $ from 'jquery';
 
@@ -270,8 +271,8 @@ const getAllRoleList = function () {
 
         <el-row :gutter="10" class="mv8">
             <el-col :span="1.5">
-                <el-button type="primary" @click="handleAdd(null)">新增</el-button>
-                <el-button type="danger" @click="batchDel">删除</el-button>
+                <el-button type="primary" @click="handleAdd(null)" v-if="hasPermission('sys:user:add')">新增</el-button>
+                <el-button type="danger" @click="batchDel" v-if="hasPermission('sys:user:delete')">删除</el-button>
             </el-col>
         </el-row>
 
@@ -295,9 +296,9 @@ const getAllRoleList = function () {
             <el-table-column prop="createTime" label="创建时间" width="200" />
             <el-table-column fixed="right" label="操作" width="200">
                 <template #default="scope">
-                    <el-button link type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-                    <el-button link type="warning" size="small" @click="showChangePwd(scope.row)">修改密码</el-button>
-                    <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)">
+                    <el-button link type="primary" size="small" @click="handleEdit(scope.row)" v-if="hasPermission('sys:user:update')">编辑</el-button>
+                    <el-button link type="warning" size="small" @click="showChangePwd(scope.row)" v-if="hasPermission('sys:user:changePwd')">修改密码</el-button>
+                    <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)" v-if="hasPermission('sys:user:delete')">
                         <template #reference>
                             <el-button link type="danger" size="small">删除</el-button>
                         </template>

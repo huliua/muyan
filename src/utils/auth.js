@@ -1,3 +1,4 @@
+import useUserStore from "@/store/modules/user";
 const TokenKey = 'Admin-Token';
 const RefreshKey = 'Refresh-Token';
 
@@ -23,4 +24,8 @@ export function getRefreshToken() {
 
 export function removeRefreshToken() {
   return localStorage.removeItem(RefreshKey);
+}
+
+export function hasPermission(permissions) {
+  return useUserStore().hasPermission(permissions);;
 }

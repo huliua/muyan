@@ -72,13 +72,13 @@ const useUserStore = defineStore('user', {
         });
       });
     },
-    hasPermission(permissions) {
+    hasPermission(perms) {
       // 如果权限是所有人都可以访问
-      if (permissions.includes("all")) {
+      if (perms.includes("all")) {
         return true;
       }
       // 判断用户的权限是否包含了permissions中的一种
-      return this.permissions.some(permission => permissions.includes(permission));
+      return this.permissions.some(permission => perms == permission);
     },
     resetData() {
       this.id = '';
