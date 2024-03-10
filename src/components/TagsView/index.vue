@@ -115,7 +115,7 @@ function closeAllTags() {
     <div class="tagsView">
         <router-link v-for="(tag, index) in visitedViews" :key="tag.path" :to="{ path: tag.path, query: tag.query }" :class="isActive(tag) ? 'active' : ''" class="tagsView-item" @contextmenu.prevent="openMenu(tag, $event)">
             {{ tag.title }}
-            <el-icon class="tagsView-item-close" @click.prevent="closePage(tag)">
+            <el-icon class="tagsView-item-close" @click.prevent="closePage(tag)" v-if="canClose()">
                 <Close />
             </el-icon>
         </router-link>

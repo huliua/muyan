@@ -24,7 +24,7 @@ const constantRoutes = [
     {
         name: 'index',
         path: '/',
-        component: () => Layout,
+        component: Layout,
         meta: {
             title: '首页',
             permission: [],
@@ -36,6 +36,7 @@ const constantRoutes = [
         path: '/:pathMatch(.*)*',
         component: () => import('@/view/error/404.vue'),
         meta: {
+            needRecord: false,
             permission: []
         }
     },

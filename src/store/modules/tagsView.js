@@ -11,6 +11,9 @@ const useTagsViewStore = defineStore('tagsView', {
             if (this.excludedViews.some((item) => { return view.path.startsWith(item); })) {
                 return;
             }
+            if (view.meta.needRecord == false) {
+                return;
+            }
             if (!this.visitedViews.some(v => v.path === view.path)) {
                 this.visitedViews.push(Object.assign({}, view, {
                     title: view.meta.title || 'no-name'

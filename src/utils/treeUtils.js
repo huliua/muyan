@@ -38,3 +38,21 @@ export function buildTreeRouterPath(tree, prePath = '') {
     }
   });
 }
+
+/**
+ * 移除树形菜单中的不可见菜单item
+ * @param {Array} tree 树形菜单列表
+ * @param {object} props 对应的树形配置信息
+ */
+export function removeInvisibleItems(tree, props = { childrenProp: 'children' }) {
+  tree.forEach(item => {
+    if (item.visible != '1') {
+      // 移除不可见菜单
+      tree.splice(tree.indexOf(item), 1);
+      return;
+    }
+    if (item[props.childrenProp] && item[props.childrenProp].length > 0) {
+      removeInvisibleItems(item[props.childrenProp], props);
+    }
+  });
+}

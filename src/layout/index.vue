@@ -7,13 +7,14 @@ import AppMain from '@/components/AppMain/index.vue';
 import router from '@/router/index.js';
 import MyHeader from '@/components/Header/index.vue';
 import TagsView from '@/components/TagsView/index.vue';
+import { removeInvisibleItems } from '@/utils/treeUtils';
 // 菜单相关
 const menuStore = useMenuStore();
 const menuList = ref([]);
 onMounted(() => {
-  // 获取菜单
   menuStore.getCanVisitedMenu().then((res) => {
-    menuList.value = res || [];
+    removeInvisibleItems(res);
+    menuList.value = res;
   });
 });
 // 修改当前菜单选中项为当前路由的路径值
@@ -36,6 +37,7 @@ const changeCollapse = function (newValue) {
   isCollapse.value = newValue;
 };
 </script>
+
 <template>
   <el-container class="main-layout">
     <el-aside class="sidebar">
@@ -73,6 +75,7 @@ const changeCollapse = function (newValue) {
     </el-container>
   </el-container>
 </template>
+
 <style scoped>
 .main-layout {
   height: 100vh;

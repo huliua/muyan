@@ -1,4 +1,5 @@
 <!--菜单页面-->
+
 <script setup name="Menu">
 import { isBlank } from '@/utils/commonUtils';
 import { addMenu, deleteMenu, getMenuList, updateMenu } from '@/api/menu';
@@ -8,6 +9,7 @@ import useDictStore from '@/store/modules/dict.js';
 import useMenuStore from '@/store/modules/menu.js';
 import dictTag from '@/components/DictTag/index.vue';
 import $ from 'jquery';
+import { computed } from 'vue';
 
 const tableData = ref([]);
 const pageSize = ref(-1);
@@ -56,6 +58,17 @@ const getTableData = function () {
   });
 };
 
+
+const resetQuery = function (needReload = false) {
+  // 设置queryParams中value为空
+  Object.keys(queryParams.value).forEach(key => {
+    queryParams.value[key].value = '';
+  });
+  if (needReload) {
+    getTableData();
+  }
+};
+
 /**
  * 添加
  * @param row
@@ -71,7 +84,7 @@ const handleAdd = function (row) {
     };
   } else {
     form.value = {
-      type: 'M',
+      type: getDefaultMenuType(row),
       parentId: row.id,
       visible: '1',
       status: '1',
@@ -80,6 +93,14 @@ const handleAdd = function (row) {
   }
 
   open.value = true;
+};
+
+const getDefaultMenuType = function (row) {
+  if (row.type === 'D') {
+    return 'D';
+  } else if (row.type === 'M') {
+    return 'B';
+  }
 };
 
 /**
@@ -102,16 +123,6 @@ const deleteRow = function (row) {
   });
 };
 
-const resetQuery = function (needReload = false) {
-  // 设置queryParams中value为空
-  Object.keys(queryParams.value).forEach(key => {
-    queryParams.value[key].value = '';
-  });
-  if (needReload) {
-    getTableData();
-  }
-};
-
 // 表单相关
 const title = ref('');
 const open = ref(false);
@@ -121,8 +132,58 @@ const rules = ref({
   menuName: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
   orderNum: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
   path: [{ required: true, message: '路由地址不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择菜单类型', trigger: 'blur' }]
+  type: [{ required: true, message: '请选择菜单类型', trigger: 'blur' }],
+  path: [{ required: true, message: '请输入路由地址', trigger: 'blur' }],
+  perms: [{ required: true, message: '请输入权限字符', trigger: 'blur' }],
+  component: [{ required: true, message: '请输入组件路径', trigger: 'blur' }],
 });
+
+const menuTypeOptions = ref([{
+  name: '目录',
+  value: 'D'
+}, {
+  name: '菜单',
+  value: 'M'
+}, {
+  name: '按钮',
+  value: 'B'
+}, {
+  name: '其他',
+  value: 'O'
+}]);
+const menuTypeArr = computed(() => {
+  // 根据当前的上级菜单，显示合适的菜单类型选项
+  return menuTypeOptions.value.filter(item => showTypeByParentId(item.value));
+});
+// 根据父级菜单类型，显示对应的菜单类型项
+const showTypeByParentId = function (type) {
+  const parentMenuId = form.value.parentId;
+  if (isBlank(parentMenuId)) {
+    // 没有选择上次菜单，只能添加目录和菜单
+    if (['D', 'M'].indexOf(type) >= 0) {
+      return true;
+    }
+    return false;
+  }
+  // 获取当前选择的菜单类型
+  const parentMenu = menuStore.allMenu.filter((item) => { return item.id === parentMenuId; })[0];
+  if (isBlank(parentMenu)) {
+    return true;
+  }
+  if (parentMenu.type == 'D') {
+    // 目录下可以有目录和菜单
+    if (['D', 'M'].indexOf(type) >= 0) {
+      return true;
+    }
+  } else if (parentMenu.type == 'M' && parentMenu.isLink == 0) {
+    // 菜单下不能有目录和菜单
+    if (['B', 'O'].indexOf(type) >= 0) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const menuOptions = ref([]);
 watch(open, newVal => {
   if (newVal === false) {
@@ -130,7 +191,7 @@ watch(open, newVal => {
   }
   // 清除表单校验
   menuRef.value?.clearValidate();
-  menuStore.getAllMenu().then(res => {
+  menuStore.getAllMenuByFilter(function (item) { return ['D', 'M'].indexOf(item.type) >= 0 && item.isLink !== '1'; }).then(res => {
     menuOptions.value = res || [];
   });
 });
@@ -202,15 +263,17 @@ const submitForm = function (formEl) {
       <el-table-column prop="perms" label="权限标识" />
       <el-table-column prop="component" label="组件路径" />
       <el-table-column prop="status" label="状态">
+
         <template #default="scope">
           <dict-tag :options="dictStatus" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" />
       <el-table-column fixed="right" label="操作" width="150">
+
         <template #default="scope">
           <el-button link type="primary" size="small" @click.prevent="handleEdit(scope.row)"> 编辑</el-button>
-          <el-button link type="primary" size="small" @click.prevent="handleAdd(scope.row)"> 新增</el-button>
+          <el-button link type="primary" size="small" :disabled="['D', 'M'].indexOf(scope.row.type) === -1 || scope.row.isLink === '1'" @click.prevent="handleAdd(scope.row)"> 新增</el-button>
           <el-popconfirm title="确定要删除吗?" @confirm="deleteRow(scope.row)">
             <template #reference>
               <el-button link type="danger" size="small"> 删除</el-button>
@@ -219,32 +282,26 @@ const submitForm = function (formEl) {
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <!--    <div>-->
-    <!--      <pagination v-model:pageSize="pageSize" v-model:currentPage="currentPage" :total="total" @pagination="getTableData()" />-->
-    <!--    </div>-->
     <!-- 添加或修改菜单对话框 -->
     <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false">
       <el-form ref="menuRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="24">
-            <el-form-item label="上级菜单">
+            <el-form-item label="上级菜单" prop="parentId">
               <el-tree-select v-model="form.parentId" :data="menuOptions" :props="{ value: 'id', label: 'menuName', children: 'children' }" value-key="id" placeholder="选择上级菜单" clearable check-strictly />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="菜单类型" prop="type">
               <el-radio-group v-model="form.type">
-                <el-radio label="D">目录</el-radio>
-                <el-radio label="M">菜单</el-radio>
-                <el-radio label="B">按钮</el-radio>
-                <el-radio label="O">其他</el-radio>
+                <el-radio v-for="(item, index) in menuTypeArr" :key="item.value" :label="item.value">{{ item.name }}</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
           <el-col :span="24" v-if="form.type == 'D' || form.type == 'M'">
             <el-form-item label="菜单图标" prop="icon">
               <el-popover placement="bottom-start" :width="540" v-model:visible="showChooseIcon" trigger="click" @show="showSelectIcon">
+
                 <template #reference>
                   <el-input v-model="form.icon" placeholder="点击选择图标" readonly>
                     <template #prefix>
@@ -269,8 +326,9 @@ const submitForm = function (formEl) {
               <el-input-number v-model="form.orderNum" controls-position="right" :min="0" />
             </el-form-item>
           </el-col>
-          <el-col :span="12" v-if="form.type == 'D' || form.type == 'M'">
+          <el-col :span="12" v-if="form.type == 'M'">
             <el-form-item>
+
               <template #label>
                 <span>
                   <el-tooltip content="选择是外链则路由地址需要以`http(s)://`开头" placement="top">
@@ -285,9 +343,10 @@ const submitForm = function (formEl) {
           </el-col>
           <el-col :span="12" v-if="form.type == 'D' || form.type == 'M'">
             <el-form-item prop="path">
+
               <template #label>
                 <span>
-                  <el-tooltip content="访问的路由地址，如：`user`，如外网地址需内链访问则以`http(s)://`开头" placement="top">
+                  <el-tooltip content="访问的路由地址，如：`user`。针对菜单类型，如外网地址需内链访问则以`http(s)://`开头" placement="top">
                     <el-icon><question-filled /></el-icon>
                   </el-tooltip>
                   路由地址
@@ -298,6 +357,7 @@ const submitForm = function (formEl) {
           </el-col>
           <el-col :span="12" v-if="form.type == 'M'">
             <el-form-item prop="component">
+
               <template #label>
                 <span>
                   <el-tooltip content="访问的组件路径，如：`/menu/index`，默认在`view`目录下" placement="top">
@@ -310,8 +370,9 @@ const submitForm = function (formEl) {
             </el-form-item>
           </el-col>
           <el-col :span="12" v-if="form.type != 'D'">
-            <el-form-item>
+            <el-form-item prop="perms">
               <el-input v-model="form.perms" placeholder="请输入权限标识" maxlength="100" />
+
               <template #label>
                 <span>
                   <el-tooltip content="控制器中定义的权限字符，如：@PreAuthorize(`@hasPermi('system:user:list')`)" placement="top">
@@ -325,6 +386,7 @@ const submitForm = function (formEl) {
           <el-col :span="12" v-if="form.type == 'M'">
             <el-form-item>
               <el-input v-model="form.queryParam" placeholder="请输入路由参数" maxlength="255" />
+
               <template #label>
                 <span>
                   <el-tooltip content='访问路由的默认传递参数，如：`{"id": 1, "name": "ry"}`' placement="top">
@@ -337,6 +399,7 @@ const submitForm = function (formEl) {
           </el-col>
           <el-col :span="12" v-if="form.type == 'D' || form.type == 'M'">
             <el-form-item>
+
               <template #label>
                 <span>
                   <el-tooltip content="选择隐藏则路由将不会出现在侧边栏，但仍然可以访问" placement="top">
@@ -352,6 +415,7 @@ const submitForm = function (formEl) {
           </el-col>
           <el-col :span="12">
             <el-form-item>
+
               <template #label>
                 <span>
                   <el-tooltip content="选择停用则路由将不会出现在侧边栏，也不能被访问" placement="top">
@@ -367,6 +431,7 @@ const submitForm = function (formEl) {
           </el-col>
         </el-row>
       </el-form>
+
       <template #footer>
         <div class="dialog-footer">
           <el-button type="primary" @click="submitForm(menuRef)">确 定</el-button>
@@ -376,6 +441,7 @@ const submitForm = function (formEl) {
     </el-dialog>
   </div>
 </template>
+
 <style scoped>
 .mv8 {
   margin: 16px 0;

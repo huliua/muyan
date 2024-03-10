@@ -3,6 +3,7 @@ import { getCanVisitedMenu, getAllMenu } from '@/api/menu.js';
 import { buildTreeData, buildTreeRouterPath } from '@/utils/treeUtils';
 import { firstUpperCase } from '@/utils/commonUtils';
 import router from '../../router';
+import $ from 'jquery';
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('../../view/**/*.vue');
 
@@ -34,13 +35,37 @@ const useMenuStore = defineStore('menu', {
         // 获取所有的菜单列表
         getAllMenu().then(res => {
           this.allMenu = res.data || [];
-          this.allTreeMenu = buildTreeData(this.allMenu);
+          this.allTreeMenu = buildTreeData($.extend(true, [], this.allMenu));
           this.getAllMenuFromDb = false;
           resolve(this.allTreeMenu);
         });
       });
     },
+
+    getAllMenuByFilter: function (filter, needReload = false) {
+      needReload = needReload || this.getAllMenuFromDb;
+      // 已经获取过菜单就不用再次获取
+      if (!needReload && this.allMenu.length > 0) {
+        return new Promise((resolve, reject) => {
+          const resMenu = this.allMenu.filter(item => filter(item));
+          resolve(buildTreeData($.extend(true, [], resMenu)));
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        // 获取所有的菜单列表
+        getAllMenu().then(res => {
+          this.allMenu = res.data || [];
+          this.allTreeMenu = buildTreeData($.extend(true, [], this.allMenu));
+          this.getAllMenuFromDb = false;
+          const resMenu = this.allMenu.filter(item => filter(item));
+          resolve(buildTreeData($.extend(true, [], resMenu)));
+        });
+      });
+    },
+
     getCanVisitedMenu: function (needReload = false) {
+      needReload = needReload || this.getAllMenuFromDb;
       // 已经获取过菜单就不用再次获取
       if (!needReload && this.treeMenu.length > 0) {
         return new Promise((resolve, reject) => {
@@ -54,7 +79,7 @@ const useMenuStore = defineStore('menu', {
           this.canVisitedRoutes = canVisitedRoutes;
           // 先加载组件
           loadView(canVisitedRoutes);
-          this.treeMenu = buildTreeData(canVisitedRoutes);
+          this.treeMenu = buildTreeData($.extend(true, [], canVisitedRoutes));
           // 同步添加到路由中
           let routerPath = Array.from(this.treeMenu);
           this.addRoutes(routerPath);
