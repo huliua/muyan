@@ -51,6 +51,9 @@ export async function refreshToken() {
   await request({
     url: '/user/refreshToken',
     method: 'post',
+    headers: {
+      needToken: false,
+    },
     _isRefreshTokenRequest: true,
   }).then(res => {
     if (res.data.token) {

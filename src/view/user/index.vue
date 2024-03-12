@@ -8,7 +8,7 @@ import { getUserList, updateUser, deleteUser, changePwd } from '@/api/user.js';
 import { getRoleList } from '@/api/role';
 import { Lock } from '@element-plus/icons-vue';
 import { hasPermission } from '@/utils/auth.js';
-
+import avatar from '@/components/Avatar/index.vue';
 import $ from 'jquery';
 
 const tableRef = ref(null);
@@ -311,8 +311,15 @@ const getAllRoleList = function () {
             <pagination v-model:pageSize="pageSize" v-model:currentPage="currentPage" v-model:total="total" @pagination="getTableData()" />
         </div>
         <!-- 添加或修改菜单对话框 -->
-        <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false" :draggable="true">
+        <el-dialog :title="title" v-model="open" width="680px" append-to-body :close-on-click-modal="false" :close-on-press-escape="false" :draggable="true">
             <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+                <el-row>
+                    <el-col>
+                        <el-form-item label="头像" prop="avatar">
+                            <avatar v-model:imageUrl="form.avatar"></avatar>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="账号" prop="userName">
