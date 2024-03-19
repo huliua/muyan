@@ -1,14 +1,12 @@
 import { login, logout, getInfo } from '@/api/login';
 import { getToken, setToken, removeToken, setRefreshToekn, removeRefreshToken } from '@/utils/auth';
-import defAva from '@/assets/images/profile.jpg';
 import { defineStore } from 'pinia';
+import $ from 'jquery';
 
 const useUserStore = defineStore('user', {
   state: () => ({
     token: getToken(),
-    id: '',
-    name: '',
-    avatar: '',
+    user: {},
     roles: [],
     permissions: [],
   }),
@@ -36,7 +34,6 @@ const useUserStore = defineStore('user', {
       return new Promise((resolve, reject) => {
         getInfo().then((res) => {
           const user = res.data.user;
-          const avatar = user.avatar == '' || user.avatar == null ? defAva : user.avatar;
           // 获取用户身份信息
           if (res.data.roles && res.data.roles.length > 0) {
             this.roles = res.data.roles;
@@ -49,9 +46,7 @@ const useUserStore = defineStore('user', {
           } else {
             this.permissions = [];
           }
-          this.id = user.id;
-          this.name = user.nickName;
-          this.avatar = avatar;
+          this.user = res.data.user;
           resolve(res.data);
         }).catch((error) => {
           reject(error);
@@ -81,12 +76,13 @@ const useUserStore = defineStore('user', {
       return this.permissions.some(permission => perms == permission);
     },
     resetData() {
-      this.id = '';
-      this.name = '';
-      this.avatar = '';
       this.roles = [];
       this.permissions = [];
       this.token = '';
+      this.user = {};
+    },
+    updateUserInfo: function (userInfo) {
+      $.extend(this.user, userInfo);
     }
   },
 });

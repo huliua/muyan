@@ -338,7 +338,7 @@ const getAllRoleList = function () {
                     </el-col>
                     <el-col :span="24" v-if="isBlank(form.id)">
                         <el-form-item label="确认密码" prop="password2">
-                            <el-input :prefix-icon="Lock" maxlength="16" v-model="form.password2" type="password2" placeholder="请输入确认密码" show-password />
+                            <el-input :prefix-icon="Lock" maxlength="16" v-model="form.password2" type="password" placeholder="请输入确认密码" show-password />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">

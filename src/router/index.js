@@ -30,7 +30,17 @@ const constantRoutes = [
             permission: [],
             keepAlive: false,
         },
-        children: []
+        children: [{
+            name: 'UserInfo',
+            path: '/user/info',
+            component: () => import('@/view/userInfo/index.vue'),
+            meta: {
+                title: '个人中心',
+                permission: [],
+                keepAlive: true,
+            },
+            children: []
+        }]
     },
     {
         path: '/:pathMatch(.*)*',
@@ -76,8 +86,8 @@ router.beforeEach((to, from, next) => {
         next({ path: '/login', query: { redirectUrl: to.fullPath } });
         return;
     }
-    // 如果当前没有菜单数据或当前登录用户为空 
-    if (useMenuStore().treeMenu.length === 0 || isBlank(useUserStore().id)) {
+    // 如果当前登录用户为空 
+    if (isBlank(useUserStore().user) || isBlank(useUserStore().user.id)) {
         // 请求菜单
         isRelogin.show = true;
         useUserStore().getInfo().then(() => {

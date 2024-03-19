@@ -2,6 +2,7 @@
 import { Fold, Expand, Moon, Sunny } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import useUserStore from "@/store/modules/user";
+import useTagsViewStore from "@/store/modules/tagsView";
 import { useDark, useToggle } from '@vueuse/core';
 const props = defineProps({
     isCollapse: {
@@ -27,6 +28,8 @@ const logout = () => {
         type: 'warning',
     }).then(() => {
         userStore.logOut().then(() => {
+            // 清空tagsView中的数据
+            useTagsViewStore().removeAllViews();
             router.push({
                 path: "/login"
             });
@@ -79,15 +82,12 @@ const isCurrentSite = (site, siteArr) => {
             <!-- 用户信息下拉菜单 -->
             <el-dropdown class="dropdown-menu">
                 <span class="el-dropdown-link">
-                    <el-avatar class="user-avatar" :size="40" :src="userStore.avatar" fit="scale-down" />
+                    <el-avatar class="user-avatar" :size="40" :src="userStore.user?.avatar" fit="scale-down" />
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
                         <el-dropdown-item>
                             <el-button text @click="router.push('/user/info')">个人信息</el-button>
-                        </el-dropdown-item>
-                        <el-dropdown-item>
-                            <el-button text @click="router.push('/user/password')">修改密码</el-button>
                         </el-dropdown-item>
                         <el-dropdown-item>
                             <el-button type="danger" text @click="logout">退出登录</el-button>

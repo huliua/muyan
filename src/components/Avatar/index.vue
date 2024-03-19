@@ -14,10 +14,11 @@ const headers = ref({
     "refresh-token": getRefreshToken()
 });
 
-const emit = defineEmits();
+const emit = defineEmits(['success', 'update:imageUrl']);
 function handleAvatarSuccess(response, uploadFile) {
     ElMessage.success("上传成功！");
     emit('update:imageUrl', response.data.data.url);
+    emit('success', response.data.data.url);
 };
 function handleAvatarError() {
     ElMessage.error("上传失败！");
@@ -48,7 +49,7 @@ function changeDisabled(value) {
 }
 </script>
 <template>
-    <el-upload class="avatar-uploader" :disabled="getDisabled()" :headers="headers" action="http://localhost:5173/api/upload/doUpload" :show-file-list="false" :on-error="handleAvatarError" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload" :limit="1">
+    <el-upload class="avatar-uploader" :disabled="getDisabled()" :headers="headers" action="http://localhost:5173/api/upload/doUpload" :show-file-list="false" :on-error="handleAvatarError" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
         <el-image v-if="props.imageUrl" :src="props.imageUrl" :zoom-rate="1.2" :max-scale="7" :min-scale="0.2" :preview-src-list="[props.imageUrl]" :initial-index="0" fit="cover" class="avatar" :hide-on-click-modal="true" @click.stop="changeDisabled(true)" @close="changeDisabled(false)" />
         <el-icon v-else class="avatar-uploader-icon">
             <Plus />
